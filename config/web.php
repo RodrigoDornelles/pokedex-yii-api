@@ -1,6 +1,5 @@
 <?php
 
-$params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
 
 $config = [
@@ -20,9 +19,26 @@ $config = [
                 ],
             ],
         ],
+        'response' => [
+            'format' => 'json',
+            'on beforeSend' => function ($event) {
+                $response = $event->sender;
+                $response->data = [
+                    'success' => $response->isSuccessful,
+                    'data' => $response->data,
+                ];
+                $response->statusCode = 200;
+            },
+        ],
+        'urlManager' => [
+            'enablePrettyUrl' => true,
+            'rules' => [
+                '<controller:<\w+>/' => '<controller>/index',
+                '/' => 'status/index',
+            ],
+        ],
         'db' => $db,
     ],
-    'params' => $params,
 ];
 
 if (YII_ENV_DEV) {
