@@ -23,10 +23,20 @@ $config = [
             'format' => 'json',
             'on beforeSend' => function ($event) {
                 $response = $event->sender;
-                $response->data = [
-                    'success' => $response->isSuccessful,
-                    'data' => $response->data,
-                ];
+                // merge key data with data to prevent ambigous
+                if (is_array($response->data) && isset($response->data['data'])) {
+                    $response->data = array_merge(
+                        ['success' => $response->isSuccessful],
+                        $response->data,
+                    );
+                }
+                // standarnization of result
+                else {
+                    $response->data = [
+                        'success' => $response->isSuccessful,
+                        'data' => $response->data,
+                    ];
+                }
                 $response->statusCode = 200;
             },
         ],
