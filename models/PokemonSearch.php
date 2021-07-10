@@ -70,7 +70,7 @@ class PokemonSearch extends Pokemon
         }
 
         if ($this->group) {
-            $query->groupBy($this->group);
+            $query->groupBy(["pokemon.id", $this->group])
         }
 
         // grid filtering conditions
