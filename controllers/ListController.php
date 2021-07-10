@@ -16,7 +16,7 @@ class ListController extends BaseController
     public function actionIndex()
     {       
         $searchModel = new PokemonSearch();
-        $searchModel->group = 'number';
+        $searchModel->distinct = 'pokemon.number';
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return [

@@ -12,7 +12,7 @@ use yii\data\ActiveDataProvider;
  */
 class PokemonSearch extends Pokemon
 { 
-    public $group;
+    public $distinct;
 
     /**
      * @inheritdoc
@@ -59,7 +59,10 @@ class PokemonSearch extends Pokemon
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => [
-                'defaultOrder' => ['number' => SORT_ASC],
+                'defaultOrder' => [
+                    'number' => SORT_ASC,
+                    'id' => SORT_ASC
+                ],
             ],
         ]);
 
@@ -69,8 +72,14 @@ class PokemonSearch extends Pokemon
             return $dataProvider;
         }
 
-        if ($this->group) {
-            $query->groupBy(["pokemon.id", $this->group])
+        // postgres distinct
+        if ($this->distinct && strpos(Yii::$app->db->dsn, 'pgsql') !== false) {
+            $query->select(new \yii\db\Expression("distinct on ({$this->distinct}) {$this->distinct}, *"));
+            $query->groupBy("pokemon.id");
+        }
+        // sqlite distinct
+        else if ($this->distinct && strpos(Yii::$app->db->dsn, 'sqlite') !== false) {
+            $query->groupBy($this->distinct);
         }
 
         // grid filtering conditions
