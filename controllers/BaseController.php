@@ -20,4 +20,20 @@ class BaseController extends Controller
             ]
         ];
     }
+
+    /**
+     * @return array|false
+     */
+    public function pagination($dataProvider)
+    {
+        if (!$dataProvider || !$dataProvider->pagination) {
+            return false;
+        }
+
+        return [
+            'page' => $dataProvider->pagination->page,
+            'pageCount'  => $dataProvider->pagination->pageCount,
+            'pageSize' => $dataProvider->pagination->pageSize
+        ];
+    }
 }

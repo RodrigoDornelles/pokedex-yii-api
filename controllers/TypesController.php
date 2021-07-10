@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use Yii;
+use app\models\Pokemon;
 
 class TypesController extends BaseController
 {
@@ -13,6 +14,11 @@ class TypesController extends BaseController
      */
     public function actionIndex()
     {
-        return [];
+        $types = Pokemon::types();
+
+        return [
+            'data' => $types,
+            'count' => count($types)
+        ];
     }
 }
