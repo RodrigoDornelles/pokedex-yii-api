@@ -20,7 +20,7 @@ class PokemonSearch extends Pokemon
     public function attributes() 
     {
         return ArrayHelper::merge(parent::attributes(), [
-            'type'
+            
         ]);
     }
 
@@ -30,7 +30,7 @@ class PokemonSearch extends Pokemon
     public function rules()
     {
         return [
-            [['type', 'type_1', 'type_2', 'name', 'number', 'legendary'], 'safe']
+            [['type_1', 'type_2', 'name', 'number', 'legendary'], 'safe']
         ];
     }
 
@@ -89,16 +89,34 @@ class PokemonSearch extends Pokemon
             'pokemon.legendary' => $this->legendary
         ]);
 
-        // grid filtering by fields */
-        $query->andFilterWhere(['ilike', 'pokemon.type_1', $this->type_1])
-            ->andFilterWhere(['ilike', 'pokemon.type_2', $this->type_2])
-            ->andFilterWhere(['ilike', 'pokemon.name', $this->name]);
+        // grid filtering by name */
+        $query->andFilterWhere(['like', 'pokemon.name', $this->name]);
 
-        // grid filtering by types in any column
-        $query->andFilterWhere(['or',
-            ['ilike', 'pokemon.type_1', $this->type],
-            ['ilike', 'pokemon.type_1', $this->type],
-        ]);
+        // grid filtering by types
+        if ($this->type_1 && $this->type_2) {
+            $query->andFilterWhere(['or',
+                ['and',
+                    ['like', 'pokemon.type_1', $this->type_1],
+                    ['like', 'pokemon.type_2', $this->type_2],
+                ],
+                ['and',
+                    ['like', 'pokemon.type_1', $this->type_2],
+                    ['like', 'pokemon.type_2', $this->type_1],
+                ],
+            ]);
+        }
+        else if ($this->type_1) {
+            $query->andFilterWhere(['or',
+                ['like', 'pokemon.type_1', $this->type_1],
+                ['like', 'pokemon.type_2', $this->type_1],
+            ]);
+        }
+        else if ($this->type_2) {
+            $query->andFilterWhere(['or',
+                ['like', 'pokemon.type_1', $this->type_2],
+                ['like', 'pokemon.type_2', $this->type_2],
+            ]);
+        }
         
         return $dataProvider;
     }
