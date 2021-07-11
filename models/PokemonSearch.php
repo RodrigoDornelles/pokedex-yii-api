@@ -20,7 +20,7 @@ class PokemonSearch extends Pokemon
     public function attributes() 
     {
         return ArrayHelper::merge(parent::attributes(), [
-
+            
         ]);
     }
 
