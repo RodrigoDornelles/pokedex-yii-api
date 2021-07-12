@@ -112,6 +112,7 @@ class PokemonSearch extends Pokemon
 
         // postgres distinct
         if ($this->distinct && strpos(Yii::$app->db->dsn, 'pgsql') !== false) {
+            $query->orderBy(['pokemon.id' => SORT_ASC]);
             $query->select(new Expression("*, ROW_NUMBER() OVER (PARTITION BY {$this->distinct}) as r"));
             $query = strtr($query->createCommand()->getRawSql(), ['LIKE' => 'ILIKE']);
             $dataProvider->query = (new Query())->from(new Expression("({$query}) as p"));
