@@ -3,6 +3,8 @@
 namespace app\models;
 
 use Yii;
+use yii\db\Query;
+use yii\db\Expression;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
 use yii\data\ActiveDataProvider;
@@ -72,16 +74,6 @@ class PokemonSearch extends Pokemon
             return $dataProvider;
         }
 
-        // postgres distinct
-        if ($this->distinct && strpos(Yii::$app->db->dsn, 'pgsql') !== false) {
-            $query->select(new \yii\db\Expression("distinct on ({$this->distinct}) {$this->distinct}, *"));
-            $query->groupBy("pokemon.id");
-        }
-        // sqlite distinct
-        else if ($this->distinct && strpos(Yii::$app->db->dsn, 'sqlite') !== false) {
-            $query->groupBy($this->distinct);
-        }
-
         // grid filtering conditions
         $query->andFilterWhere([
             'pokemon.id' => $this->id,
@@ -116,6 +108,18 @@ class PokemonSearch extends Pokemon
                 ['like', 'pokemon.type_1', $this->type_2],
                 ['like', 'pokemon.type_2', $this->type_2],
             ]);
+        }
+
+        // postgres distinct
+        if ($this->distinct && strpos(Yii::$app->db->dsn, 'pgsql') !== false) {
+            $query->select(new Expression("*, ROW_NUMBER() OVER (PARTITION BY {$this->distinct}) as r"));
+            $query = strtr($query->createCommand()->getRawSql(), ['LIKE' => 'ILIKE']);
+            $dataProvider->query = (new Query())->from(new Expression("({$query}) as p"));
+            $dataProvider->query->andWhere(["r" => 1]);
+        }
+        // sqlite distinct
+        else if ($this->distinct && strpos(Yii::$app->db->dsn, 'sqlite') !== false) {
+            $query->groupBy($this->distinct);
         }
         
         return $dataProvider;
