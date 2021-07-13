@@ -22,7 +22,7 @@ class PokemonSearch extends Pokemon
     public function attributes() 
     {
         return ArrayHelper::merge(parent::attributes(), [
-            
+            'mega'
         ]);
     }
 
@@ -32,7 +32,7 @@ class PokemonSearch extends Pokemon
     public function rules()
     {
         return [
-            [['type_1', 'type_2', 'name', 'number', 'legendary'], 'safe']
+            [['type_1', 'type_2', 'name', 'mega', 'number', 'legendary'], 'safe']
         ];
     }
 
@@ -67,6 +67,20 @@ class PokemonSearch extends Pokemon
                 ],
             ],
         ]);
+
+        // ordering by types
+        $dataProvider->sort->attributes['type'] = [
+            'asc' => [
+                '(type_2 IS NULL)' => SORT_ASC,
+                'type_1' => SORT_ASC,
+                'type_2' => SORT_DESC
+            ],
+            'desc' => [
+                '(type_2 IS NULL)' => SORT_ASC,
+                'type_1' => SORT_DESC,
+                'type_2' => SORT_ASC
+            ],
+        ];
 
         $this->load($params);
 
@@ -107,6 +121,14 @@ class PokemonSearch extends Pokemon
             $query->andFilterWhere(['or',
                 ['like', 'pokemon.type_1', $this->type_2],
                 ['like', 'pokemon.type_2', $this->type_2],
+            ]);
+        }
+
+        // grid filtering by mega evolution
+        if ($this->mega) {
+            $query->andFilterWhere(['or',
+                ['like', 'pokemon.name', 'mega'],
+                ['like', 'pokemon.name', 'primal'],
             ]);
         }
 
